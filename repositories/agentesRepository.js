@@ -3,7 +3,7 @@ const db = require("../db/db")
 async function createAgent(data) {
     try {
         
-        const created = await db("agentes").insert(data, ["*"])
+        const created = await db("agentes").insert(data).returning("*");
         return created
 
     } catch (error) {
@@ -33,8 +33,7 @@ async function getAgentByID(id) {
 async function updateAgent(id, data) {
     try {
         
-        const updated = await db("agentes").where({id:id}).update(data,["*"]) 
-
+        const updated = await db("agentes").where({ id: id }).update(data).returning("*");
         if(!updated){
             return false
         }
@@ -48,28 +47,25 @@ async function updateAgent(id, data) {
 }
 
 async function deleteAgent(id) {
-
     try {
-        
-        const deleted = await db("agentes").where({id: id}).del()
-
-         if(!deleted){
-            return false
-        }
-        return true;
-
-
+        const deleted = await db("agentes").where({ id: id }).del();
+        return deleted > 0; 
     } catch (error) {
-        
-        console.log(error)
-        return false
+        console.log(error);
+        return false;
     }
-    
 }
 
-async function getAll() {
+async function getAll(sortBy, order) {
     try {
-        const agentes = await db("agentes").select("*");
+       
+        let query = db("agentes").select("*");
+
+        if (sortBy === "dataDeIncorporacao" && ["asc", "desc"].includes(order)) {
+            query = query.orderBy(sortBy, order);
+        }
+
+        const agentes = await query;
         return agentes;
     } catch (error) {
         console.log(error);
@@ -77,4 +73,6 @@ async function getAll() {
     }
 }
 
-module.exports = { getAll, getAgentByID ,createAgent, updateAgent, deleteAgent };
+
+
+module.exports = { getAll, getAgentByID ,createAgent, updateAgent, deleteAgent, patchAgent: updateAgent };

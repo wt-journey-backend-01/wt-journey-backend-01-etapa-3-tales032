@@ -3,7 +3,7 @@ const db = require("../db/db")
 async function createCase(data) {
     try {
         
-        const created = await db("casos").insert(data, ["*"])
+        const created = await db("casos").insert(data).returning("*");
         return created
 
     } catch (error) {
@@ -33,7 +33,7 @@ async function getCaseByID(id) {
 async function updateCase(id, data) {
     try {
         
-        const updated = await db("casos").where({id:id}).update(data,["*"]) 
+        const updated = await db("casos").where({ id: id }).update(data).returning("*");
 
         if(!updated){
             return false
@@ -77,4 +77,4 @@ async function getAll() {
     }
 }
 
-module.exports = { getAll, getCaseByID ,createCase, updateCase, deleteCase };
+module.exports = { getAll, getCaseByID ,createCase, updateCase, deleteCase, patchCase: updateCase  };

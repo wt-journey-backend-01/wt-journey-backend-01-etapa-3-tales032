@@ -55,21 +55,17 @@ function validatePutAgent(data) {
 
 function validatePatchAgent(data) {
   if (data.id) {
-      res.status(400).json({ message: "Não é permitido alterar o ID de um agente." });
-      return false;
+      return { isValid: false, message: "Não é permitido alterar o ID de um agente." };
   }
   
   if (data.nome !== undefined && (typeof data.nome !== 'string' || data.nome.trim() === '')) {
-      res.status(400).json({ message: "O campo 'nome' deve ser uma string não vazia." });
-      return false;
+      return { isValid: false, message: "O campo 'nome' deve ser uma string não vazia." };
   }
   if (data.dataDeIncorporacao !== undefined && !isValidDate(data.dataDeIncorporacao)) {
-      res.status(400).json({ message: "O campo 'dataDeIncorporacao' deve estar no formato YYYY-MM-DD e não pode ser no futuro." });
-      return false;
+      return { isValid: false, message: "O campo 'dataDeIncorporacao' (YYYY-MM-DD) deve ser uma data válida e não futura." };
   }
   if (data.cargo !== undefined && (typeof data.cargo !== 'string' || data.cargo.trim() === '')) {
-      res.status(400).json({ message: "O campo 'cargo' deve ser uma string não vazia." });
-      return false;
+      return { isValid: false, message: "O campo 'cargo' deve ser uma string não vazia." };
   }
   return true;
 }
@@ -77,27 +73,14 @@ function validatePatchAgent(data) {
 
 
 async function getAllController(req, res) {
-   try{
-    let agentes = await agentesRepository.getAll();
-   const { sortBy, order } = req.query; 
-
-   if (sortBy === 'dataDeIncorporacao') {
-       agentes.sort((a, b) => {
-           const dateA = new Date(a.dataDeIncorporacao);
-           const dateB = new Date(b.dataDeIncorporacao);
-           if (order === 'desc') { 
-               return dateB - dateA;
-           }
-           return dateA - dateB;
-       });
-   }
-   
-   res.status(200).json(agentes);
-
-}   catch(error){
-        console.error(error);
+    try {
+        const { sortBy, order } = req.query;
+       
+        const agentes = await agentesRepository.getAll(sortBy, order);
+        res.status(200).json(agentes);
+    } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
-}
+    }
 }
 
 async function getAgentByIDController(req, res) {
