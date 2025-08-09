@@ -61,10 +61,10 @@ async function getAll(sortBy, order) {
        
         let query = db("agentes").select("*");
 
-        if (sortBy === "dataDeIncorporacao" && ["asc", "desc"].includes(order)) {
-            query = query.orderBy(sortBy, order);
-        }
-
+       const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo'];
+        if (sortBy && validSortFields.includes(sortBy) && ['asc', 'desc'].includes(order)) {
+        query = query.orderBy(sortBy, order);
+}       
         const agentes = await query;
         return agentes;
     } catch (error) {
