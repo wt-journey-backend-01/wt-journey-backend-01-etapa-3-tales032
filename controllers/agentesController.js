@@ -140,7 +140,7 @@ async function updateAgentController(req,res){
             return res.status(400).json({ message: validation.message });
         }
        const updatedAgent = await agentesRepository.updateAgent(id, data); 
-       res.status(200).json(updatedAgent[0]);
+       res.status(200).json(updatedAgent);
     }catch(error){
         console.error(error);
         res.status(500).json({ message: "Erro interno do servidor." });
@@ -163,7 +163,7 @@ async function patchAgentController(req,res){
             return res.status(400).json({ message: validation.message });
         }
        const patchedAgent = await agentesRepository.patchAgent(id, data); 
-       res.status(200).json(patchedAgent[0]);
+       res.status(200).json(patchedAgent);
     }catch(error){
         console.error(error);
         res.status(500).json({ message: "Erro interno do servidor." });

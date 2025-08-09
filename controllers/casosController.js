@@ -110,7 +110,7 @@ async function updateCaseController(req, res) {
         }
 
         const updatedCase = await casosRepository.updateCase(id, data);
-        res.status(200).json(updatedCase[0]);
+        res.status(200).json(updatedCase);
     } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
     }
@@ -133,7 +133,7 @@ async function patchCaseController(req, res) {
         }
 
         const patchedCase = await casosRepository.patchCase(id, data);
-        res.status(200).json(patchedCase[0]);
+        res.status(200).json(patchedCase);
     } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
     }
