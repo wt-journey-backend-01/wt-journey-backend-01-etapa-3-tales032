@@ -35,8 +35,8 @@ async function updateCase(id, data) {
         
         const updated = await db("casos").where({ id: id }).update(data).returning("*");
 
-        if(!updated){
-            return false
+        if (updated.length === 0) {
+            return false; 
         }
         return updated[0]
 
@@ -67,9 +67,25 @@ async function deleteCase(id) {
     
 }
 
-async function getAll() {
+async function getAll(filtros) { 
     try {
-        const casos = await db("casos").select("*");
+        let query = db("casos").select("*");
+
+        if (filtros.status) {
+            query = query.where('status', filtros.status);
+        }
+        if (filtros.agente_id) {
+            query = query.where('agente_id', filtros.agente_id);
+        }
+     
+        if (filtros.search) {
+            query = query.where(function() {
+                this.where('titulo', 'ilike', `%${filtros.search}%`)
+                    .orWhere('descricao', 'ilike', `%${filtros.search}%`);
+            });
+        }
+
+        const casos = await query;
         return casos;
     } catch (error) {
         console.log(error);

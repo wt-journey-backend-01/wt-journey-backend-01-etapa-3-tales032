@@ -67,7 +67,7 @@ function validatePatchAgent(data) {
   if (data.cargo !== undefined && (typeof data.cargo !== 'string' || data.cargo.trim() === '')) {
       return { isValid: false, message: "O campo 'cargo' deve ser uma string não vazia." };
   }
-  return true;
+    return { isValid: true };
 }
 
 

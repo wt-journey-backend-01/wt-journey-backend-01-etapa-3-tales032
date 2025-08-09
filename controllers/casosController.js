@@ -52,29 +52,16 @@ async function validateCaso(data, isPatch = false) {
 
 async function getCasosController(req, res) {
    try {
-    
-        let casos = await casosRepository.getAll();
-        const { status, agente_id, search } = req.query;
-
-        if (status) {
-            casos = casos.filter(caso => caso.status === status);
-        }
-        if (agente_id) {
-            casos = casos.filter(caso => caso.agente_id == agente_id); 
-        }
-        if (search) {
-            const lowerSearch = search.toLowerCase();
-            casos = casos.filter(caso =>
-                caso.titulo.toLowerCase().includes(lowerSearch) ||
-                caso.descricao.toLowerCase().includes(lowerSearch)
-            );
-        }
+        
+        const filtros = req.query; 
+        const casos = await casosRepository.getAll(filtros);
+        
         res.status(200).json(casos);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: "Erro interno do servidor." });
     }
 }
-
 async function getCaseByIDController(req, res) {
     try {
         const id = Number(req.params.id);
