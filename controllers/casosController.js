@@ -17,14 +17,14 @@ async function validateNewCase(data, res) {
        if (!data.agente_id) {
         return { valid: false, status: 400, message: "O campo 'agente_id' é obrigatório." };
     }
-    const agentExists = await agentesRepository.read(data.agente_id);
+    const agentExists = await agentesRepository.getCaseByID(data.agente_id);
     if (!agentExists) {
         return { valid: false, status: 404, message: "Agente responsável não encontrado." };
     }
     return { valid: true };
 }
 
-function validatePutCase(data, res) {
+async function validatePutCase(data, res) {
   if (data.id) {
       res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
       return false;
@@ -43,14 +43,15 @@ function validatePutCase(data, res) {
       res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
       return false;
   }
-  if (!data.agente_id || !agentesRepository.getAgentByID(data.agente_id)) {
-      res.status(404).json({ message: "Agente responsável não encontrado." });
-      return false;
+  const agent = await agentesRepository.getCaseByID(data.agente_id); 
+  if (!agent) {
+    res.status(404).json({ message: "Agente responsável não encontrado." });
+    return false;
   }
   return true;
 }
 
-function validatePatchCase(data, res) {
+await function validatePatchCase(data, res) {
   if (data.id) {
       res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
       return false;
@@ -74,8 +75,8 @@ function validatePatchCase(data, res) {
   return true;
 }
 
-function checkExist(id, res) {
-    const caso = casosRepository.getCaseByID(id);
+async function checkExist(id, res) {
+    const caso = await casosRepository.getCaseByID(id);
     if (!caso) {
         res.status(404).json({ message: "Caso não cadastrado no banco de dados!" });
         return null;
@@ -113,6 +114,9 @@ async function getCasosController(req, res) {
 async function getCaseByIDController(req, res) {
     try{
         const { id } = req.params;
+        if (isNaN(id)) {
+        return res.status(400).json({ message: "O ID deve ser um número." });
+        }
         const caso = await checkExist(id, res);
         if (!caso) return; 
         res.status(200).json(caso);
@@ -125,7 +129,9 @@ async function getCaseByIDController(req, res) {
 async function createCaseController(req,res){
     try{
         const data = req.body;
-        if (!validateNewCase(data, res)) {
+        const validation = await validateNewCase(data, res);
+       if (!validation.valid) {
+        res.status(validation.status).json({ message: validation.message });
         return;
         }
         const newCase = await casosRepository.createCase(data);
@@ -139,6 +145,9 @@ async function createCaseController(req,res){
 async function updateCaseController(req,res){
     try{
         const { id } = req.params;
+        if (isNaN(id)) {
+        return res.status(400).json({ message: "O ID deve ser um número." });
+        }
         const data = req.body;
          if (!checkExist(id, res)) return;
         if (!validatePutCase(data, res)) return;
@@ -153,6 +162,9 @@ async function updateCaseController(req,res){
 async function patchCaseController(req,res){
     try{
         const { id } = req.params;
+        if (isNaN(id)) {
+        return res.status(400).json({ message: "O ID deve ser um número." });
+        }
          const data = req.body;
          if (!checkExist(id, res)) return;
         if (!validatePatchCase(data, res)) return;
@@ -167,6 +179,9 @@ async function patchCaseController(req,res){
 async function deleteCaseController(req,res){
     try{
         const { id } = req.params;
+        if (isNaN(id)) {
+        return res.status(400).json({ message: "O ID deve ser um número." });
+        }
         if (!checkExist(id, res)) return;
         await casosRepository.deleteCase(id);
         res.status(204).send();

@@ -18,7 +18,7 @@ async function getAgentByID(id) {
         
         const result = await db("agentes").where({id:id})
         
-        if(!result){
+        if(result.length === 0){
             return false
         }
         return result[0]

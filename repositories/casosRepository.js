@@ -18,7 +18,7 @@ async function getCaseByID(id) {
         
         const result = await db("casos").where({id:id})
         
-        if(!result){
+        if(result.length === 0){
             return false
         }
         return result[0]
@@ -69,8 +69,8 @@ async function deleteCase(id) {
 
 async function getAll() {
     try {
-        const agentes = await db("casos").select("*");
-        return agentes;
+        const casos = await db("casos").select("*");
+        return casos;
     } catch (error) {
         console.log(error);
         return false;

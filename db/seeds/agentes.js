@@ -4,11 +4,7 @@
  */
 exports.seed = async function(knex) {
  
-  await knex('agentes').del();
-  
-
   await knex.raw('TRUNCATE TABLE agentes RESTART IDENTITY CASCADE');
-
 
   await knex('agentes').insert([
     { nome: 'Fox Mulder', dataDeIncorporacao: '1993-10-24', cargo: 'Agente Especial' },

@@ -35,7 +35,7 @@ const agentesController = require('../controllers/agentesController');
 *           type: string
 *           description: O cargo do agente.
 *       example:
-*         id: "401bccf5-cf9e-489d-8412-446cd169a0f1"
+*         id: "2"
 *         nome: "Clara Monteiro"
 *         dataDeIncorporacao: "2010-05-15" # MUDOU: formato da data
 *         cargo: "Delegada Titular"
