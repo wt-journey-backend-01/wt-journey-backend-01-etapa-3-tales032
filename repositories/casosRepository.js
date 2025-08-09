@@ -14,22 +14,18 @@ async function createCase(data) {
 }
 
 async function getCaseByID(id) {
-    try {
-        
-        const result = await db("casos").where({id:id})
-        
-        if(result.length === 0){
-            return false
-        }
-        return result[0]
-
-    } catch (error) {
-
-        console.log(error)
-        return false
-    }
+  try {
+      const result = await db("casos").where({id: id});
+      
+      if(result.length === 0){
+          return null; 
+      }
+      return result[0];
+  } catch (error) {
+      console.log(error);
+      return null; 
+  }
 }
-
 async function updateCase(id, data) {
   try {
     const updated = await db("casos")

@@ -14,22 +14,18 @@ async function createAgent(data) {
 }
 
 async function getAgentByID(id) {
-    try {
-        
-        const result = await db("agentes").where({id:id})
-        
-        if(result.length === 0){
-            return false
-        }
-        return result[0]
-
-    } catch (error) {
-
-        console.log(error)
-        return false
-    }
+  try {
+      const result = await db("agentes").where({id: id});
+      
+      if(result.length === 0){
+          return null; 
+      }
+      return result[0];
+  } catch (error) {
+      console.log(error);
+      return null; 
+  }
 }
-
 async function updateAgent(id, data) {
   try {
     const updated = await db("agentes")
