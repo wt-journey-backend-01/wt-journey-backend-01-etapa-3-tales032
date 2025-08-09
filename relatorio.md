@@ -1,199 +1,314 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 1 créditos restantes para usar o sistema de feedback AI.
+Você tem 9 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para tales032:
 
-Nota final: **42.5/100**
+Nota final: **12.0/100**
 
 Olá, tales032! 👋🚀
 
-Primeiro, parabéns pelo esforço em construir essa API para o Departamento de Polícia! Você estruturou seu projeto com controllers, routes e repositories — isso já é um baita passo para um código organizado e modular. 🎉 Também vi que a documentação Swagger está bem detalhada, o que é ótimo para a manutenção e uso da API. Vamos juntos analisar seu código para destravar de vez os pontos que podem melhorar? 😉
+Antes de tudo, parabéns por chegar até aqui! Migrar uma API de armazenamento em memória para um banco de dados real é um passo enorme e desafiador. Você já tem uma estrutura organizada, com controllers, repositories, rotas e até documentação Swagger — isso mostra que você está no caminho certo! 🎉 Além disso, vi que você conseguiu implementar corretamente o tratamento de payloads inválidos com status 400, que é uma parte fundamental para proteger sua API. Mandou bem nessa! 👏
 
 ---
 
-## 🎯 O que você já mandou bem (vamos celebrar! 🎉)
+## Vamos destrinchar seu projeto e dar aquele upgrade para que tudo funcione redondinho! 🔍✨
 
-- Você implementou os endpoints para os recursos `/agentes` e `/casos` com todos os métodos HTTP esperados (GET, POST, PUT, PATCH, DELETE). Isso já mostra que você entendeu a estrutura básica da API REST.
-- A arquitetura modular está correta: `routes`, `controllers` e `repositories` estão separados e organizados, o que facilita a manutenção.
-- A validação dos dados no controller está presente e tenta garantir que os dados enviados estejam coerentes.
-- O uso do Swagger para documentação é um diferencial que você implementou bem.
-- Você também implementou filtros nos endpoints, como a ordenação dos agentes por data de incorporação e os filtros por status e agente nos casos.
-- Os status HTTP retornados estão coerentes em muitos pontos (201 para criação, 404 para recursos não encontrados, 204 para deleção sem conteúdo, etc).
-- Parabéns por já ter implementado as mensagens de erro customizadas para payloads inválidos — isso melhora muito a experiência do consumidor da API!
+### 1. Estrutura do Projeto e Organização
+
+Sua estrutura está praticamente alinhada com o que esperamos:
+
+```
+📦 SEU-REPOSITÓRIO
+│
+├── package.json
+├── server.js
+├── knexfile.js
+├── INSTRUCTIONS.md
+│
+├── db/
+│   ├── migrations/
+│   ├── seeds/
+│   └── db.js
+│
+├── routes/
+│   ├── agentesRoutes.js
+│   └── casosRoutes.js
+│
+├── controllers/
+│   ├── agentesController.js
+│   └── casosController.js
+│
+├── repositories/
+│   ├── agentesRepository.js
+│   └── casosRepository.js
+│
+└── utils/
+    └── errorHandler.js
+```
+
+Você seguiu essa organização, o que é ótimo! Isso facilita a manutenção e o crescimento do projeto. 👍
 
 ---
 
-## 🔍 Pontos para melhorar — vamos à análise profunda! 🕵️‍♂️
+### 2. Conexão com o Banco de Dados e Configuração do Knex
 
-### 1. **IDs dos agentes e casos não estão no formato UUID esperado**
+Aqui encontrei um ponto crítico que está impactando várias funcionalidades da sua API.
 
-Um ponto crítico que impacta vários testes e funcionalidades é que os IDs usados para os agentes e casos não seguem o padrão UUID esperado. 
+- **No arquivo `knexfile.js` você configurou corretamente o client `pg` e as migrations/seeds.**
+- **No arquivo `db/db.js`, você está importando o config e criando a instância do Knex com `config.development`.**
 
-- No seu `repositories/agentesRepository.js`, o array inicial de agentes tem o agente com id `"f47ac10b-58cc-4372-a567-0e02b2c3d479"`, que parece UUID, mas a dataDeIncorporacao está no formato `"1992/10/04"`, que não bate com o formato esperado pelo validador (`YYYY-MM-DD`).
-- Além disso, notei que na validação da data em `controllers/agentesController.js` você espera o formato `YYYY/MM/DD` (com barras), mas na documentação Swagger e no padrão REST o formato mais comum é `YYYY-MM-DD` (com hífens). Essa inconsistência pode causar falhas na validação e confundir clientes da API.
+Porém, ao analisar seus repositórios (`agentesRepository.js` e `casosRepository.js`), percebi que as funções são assíncronas, mas **em seus controllers você está chamando essas funções como se fossem síncronas**.
 
-**Por que isso é importante?**  
-Muitos testes e o funcionamento correto da API dependem de IDs válidos no formato UUID para garantir unicidade e integridade. Se o ID não estiver no formato correto, o sistema pode falhar ao buscar ou manipular os dados.
-
-**Como corrigir?**
-
-- Garanta que os IDs usados e gerados sejam UUIDs válidos usando o pacote `uuid` (que você já está usando).
-- Ajuste o formato da data para `YYYY-MM-DD` tanto na validação quanto no armazenamento.
-- Atualize o validador de datas para aceitar o formato com hífens:
+Por exemplo, no seu `agentesController.js`:
 
 ```js
-function isValidDate(dateString) {
-    const regex = /^\d{4}-\d{2}-\d{2}$/; // Ajustado para hífens
-    if (!regex.test(dateString)) return false;
-
-    const parts = dateString.split("-");
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
-    const date = new Date(year, month - 1, day);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const isValid = date.getFullYear() === year &&
-                    date.getMonth() === month - 1 &&
-                    date.getDate() === day &&
-                    date <= today;
-
-    return isValid;
+function checkExist(id, res) {
+    const agente = agentesRepository.getAgentByID(id);
+    if (!agente) {
+        res.status(404).json({ message: "Agente não cadastrado no banco de dados!" });
+        return null;
+    }
+    return agente; 
 }
 ```
 
-- Ajuste também os dados iniciais para seguir esse padrão:
+Aqui você chama `agentesRepository.getAgentByID(id)` sem `await` e sem tratar a promise. Isso significa que `agente` é uma Promise, que sempre será "truthy", e seu código não está esperando o resultado do banco.
 
-```js
-const agentes = [
-    {
-        id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-        nome: "Rommel Carneiro",
-        dataDeIncorporacao: "1992-10-04", // formato corrigido
-        cargo: "delegado"
-    }
-];
-```
-
----
-
-### 2. **Inconsistência nos nomes das funções no `agentesRepository`**
-
-Ao analisar seu `agentesRepository.js`, percebi que o nome das funções para atualizar e patchar agentes estão diferentes do que você chama no controller:
-
-- No repositório, as funções estão assim: `updateAgent` e `patchAgent`.
-- No controller `agentesController.js`, você chama `agentesRepository.updateAgente` e `agentesRepository.patchAgente` (com “e” no final).
-
-Isso gera um erro silencioso porque essas funções não existem, e consequentemente as atualizações não acontecem.
-
-**Solução:** alinhe os nomes das funções para que sejam iguais em ambos os lugares.
-
-```js
-// No agentesRepository.js
-function updateAgent(id, dadosParaAtualizar) { ... }
-function patchAgent(id, dadosParaAtualizar) { ... }
-
-// No agentesController.js
-const updatedAgent = agentesRepository.updateAgent(id, data);
-const patchedAgent = agentesRepository.patchAgent(id, data);
-```
-
----
-
-### 3. **Validação dos dados e tratamento de erros**
-
-Você fez um bom trabalho implementando validações, mas há alguns detalhes para ajustar:
-
-- Como falei acima, a validação da data espera barras `/` no formato `YYYY/MM/DD`, mas o padrão REST e o Swagger usam hífens `-`. Isso pode causar rejeição indevida de dados válidos enviados pelo cliente.
-- O validador `validateUpdateAgent` e `validateUpdateCase` aceitam o campo `id` para bloqueá-lo, mas não garantem que os outros campos estejam no formato correto quando enviados. Você fez um bom trabalho aqui, só reforçar a consistência do formato da data.
-- Nos controllers, você está retornando a resposta de erro direto dentro da função de validação, o que é uma prática válida, mas pode dificultar testes e manutenção. Uma alternativa é retornar um objeto com status e mensagem, e deixar o controller decidir como responder. Mas isso é mais uma sugestão para evoluir seu código.
-
----
-
-### 4. **Filtros e ordenação**
-
-Você implementou filtros para os casos (`status`, `agente_id`, `search`) e ordenação para agentes por `dataDeIncorporacao`. Isso é excelente! 🎉
-
-Porém, notei que nos testes bônus de filtragem mais complexa, como ordenação decrescente por data, os testes falharam. Isso indica que sua implementação só cobre ordenação crescente.
-
-**Como melhorar?**
-
-- Permita um parâmetro extra para a direção da ordenação, por exemplo, `order=asc` ou `order=desc`.
-- No controller de agentes, modifique para algo como:
+O mesmo acontece em outros lugares, como:
 
 ```js
 function getAllController(req, res) {
-    let agentes = agentesRepository.getAll();
-    const { sortBy, order } = req.query;
-
-    if (sortBy === 'dataDeIncorporacao') {
-        agentes.sort((a, b) => {
-            const dateA = new Date(a.dataDeIncorporacao);
-            const dateB = new Date(b.dataDeIncorporacao);
-            if (order === 'desc') {
-                return dateB - dateA;
-            }
-            return dateA - dateB;
-        });
-    }
-
-    res.status(200).json(agentes);
+   let agentes = agentesRepository.getAll();
+   // ...
+   res.status(200).json(agentes);
 }
 ```
 
-Assim, você atende também os casos de ordenação decrescente.
+Mas no código do repositório, não vi a função `getAll` implementada — e mesmo que estivesse, seria async e precisaria ser aguardada.
 
 ---
 
-### 5. **Arquitetura e estrutura de diretórios**
+### 3. Falta de Await e Funções Async nos Controllers
 
-A estrutura do seu projeto está correta e segue o padrão esperado, com pastas separadas para `controllers`, `repositories`, `routes`, `docs` e `utils`. Isso é ótimo e facilita muito a escalabilidade do código. Continue assim! 👍
+Esse é o principal motivo pelo qual várias operações CRUD não funcionam como esperado.
 
----
+**Para resolver, você precisa:**
 
-## 📚 Recursos para você aprofundar e corrigir esses pontos
+- Tornar seus controllers async.
+- Usar `await` para chamar as funções async do repositório.
+- Tratar erros com try/catch para evitar que promessas rejeitadas quebrem o servidor.
 
-- Para entender melhor como trabalhar com rotas e middlewares no Express:  
-  https://expressjs.com/pt-br/guide/routing.html  
-  (Isso vai ajudar a garantir que seus endpoints estejam bem configurados e organizados.)
+Exemplo de como ajustar o `getAgentByIDController`:
 
-- Para aprender sobre validação de dados em APIs Node.js/Express:  
-  https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_  
-  (Esse vídeo é ótimo para entender como validar e tratar erros de forma elegante.)
+```js
+async function getAgentByIDController(req, res) {
+    try {
+        const { id } = req.params;
+        const agente = await agentesRepository.read(id); // Use o método correto do repo
+        if (!agente) {
+            return res.status(404).json({ message: "Agente não cadastrado no banco de dados!" });
+        }
+        res.status(200).json(agente);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
+}
+```
 
-- Para entender o padrão UUID e como gerar IDs corretamente:  
-  https://www.npmjs.com/package/uuid  
-  (Você já usa o pacote, mas vale a pena revisar como garantir IDs válidos e consistentes.)
+Note que aqui:
 
-- Para manipulação avançada de arrays em JavaScript (filtragem, ordenação, etc):  
-  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI  
-  (Isso vai te ajudar a implementar filtros e ordenações mais flexíveis.)
+- Usei `await` para esperar o banco responder.
+- Usei o método `read` do repositório, que está implementado e retorna o agente pelo id.
+- Adicionei tratamento de erro com try/catch.
 
-- Para entender o formato correto de datas ISO 8601 (que é o padrão para APIs REST):  
-  https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString  
-  (Adotar esse padrão evita muitos problemas de parsing e validação.)
-
----
-
-## 📝 Resumo Rápido para Você Focar
-
-- Corrija o formato das datas para `YYYY-MM-DD` e ajuste a validação para aceitar esse padrão.
-- Garanta que os IDs sejam UUIDs válidos e consistentes em todo o projeto.
-- Alinhe os nomes das funções no repository e controllers (`updateAgent` vs `updateAgente`) para evitar erros silenciosos.
-- Melhore a ordenação dos agentes para suportar ordem crescente e decrescente.
-- Continue aprimorando as validações e mensagens de erro para garantir clareza e robustez.
-- Mantenha a estrutura modular e organizada, isso é um ponto forte seu!
+Esse padrão deve ser usado em todos os controllers que acessam o banco.
 
 ---
 
-Você está no caminho certo, tales032! 🚀 Com esses ajustes, sua API vai ficar mais robusta, confiável e alinhada com as melhores práticas. Continue praticando, revisando seu código e explorando esses conceitos que o sucesso vem com certeza! 💪✨
+### 4. Métodos do Repositório e Nomeação
 
-Se precisar, volte aqui para tirar dúvidas ou para revisar juntos o próximo passo. Bora codar! 👨‍💻👩‍💻
+No seu `agentesRepository.js`, os métodos são chamados `create`, `read`, `update`, `remove`, mas nos controllers você chama funções como `getAgentByID`, `createAgent`, `deleteAgent`, que não existem.
 
-Abraços e até a próxima! 🤗👾
+Você precisa alinhar os nomes para evitar confusão.
+
+Sugestão:
+
+- No repositório, mantenha os métodos `create`, `read`, `update`, `remove`.
+- No controller, chame esses métodos com `await agentesRepository.read(id)` etc.
+
+---
+
+### 5. Implementação de Métodos Faltantes no Repositório
+
+Notei que no seu controller você chama funções como:
+
+```js
+const agentes = agentesRepository.getAll();
+```
+
+Mas não encontrei essa função `getAll` no seu `agentesRepository.js`.
+
+Você precisa implementar esse método para listar todos os agentes:
+
+```js
+async function getAll() {
+    try {
+        const agentes = await db("agentes").select("*");
+        return agentes;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+```
+
+O mesmo vale para o repositório de casos.
+
+---
+
+### 6. Ajustes nas Migrations e Seeds
+
+Na migration, você criou as tabelas com `id` como `increments()`, que gera um inteiro autoincrementado, mas na documentação Swagger e no controller você espera `id` como UUID string.
+
+Isso gera conflito, porque:
+
+- O campo `id` é INT no banco.
+- O Swagger e payloads esperam `id` como string UUID.
+
+**Você precisa escolher um formato e manter consistência.**
+
+Se quiser usar UUID, altere a migration para:
+
+```js
+table.uuid("id").primary().defaultTo(knex.raw('gen_random_uuid()'));
+```
+
+E certifique-se de que o banco tenha a extensão `pgcrypto` para gerar UUIDs.
+
+Se preferir usar INT autoincrement, ajuste seu Swagger e controllers para refletir isso (usar número no `id`).
+
+---
+
+### 7. Seeds e Limpeza das Tabelas
+
+No seu seed de agentes, você faz:
+
+```js
+await knex('agentes').del();
+await knex.raw('TRUNCATE TABLE agentes RESTART IDENTITY CASCADE');
+```
+
+O `del()` já apaga os dados, e o `TRUNCATE` também. Normalmente, só um deles é suficiente. Prefira usar apenas o `TRUNCATE` para resetar o contador de ids:
+
+```js
+await knex.raw('TRUNCATE TABLE agentes RESTART IDENTITY CASCADE');
+```
+
+---
+
+### 8. Validação de Dados e Tratamento de Erros
+
+Você fez um ótimo trabalho validando os dados no controller, com mensagens claras e status codes adequados. Isso é essencial para uma API robusta! 👏
+
+Só reforço que, para que as validações de existência de agentes e casos funcionem, o acesso ao banco precisa estar correto (como expliquei no ponto 3).
+
+---
+
+### 9. Recomendações de Recursos para Você
+
+Para te ajudar a entender e corrigir esses pontos, recomendo fortemente que você veja:
+
+- **Knex.js - Guia de Query Builder e Migrations:**  
+  https://knexjs.org/guide/query-builder.html  
+  https://knexjs.org/guide/migrations.html
+
+- **Como lidar com funções assíncronas no Node.js/Express:**  
+  https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_ (Validação e tratamento de erros)  
+  https://youtu.be/RSZHvQomeKE (HTTP status codes e tratamento de respostas)
+
+- **Configuração de PostgreSQL com Docker e Node.js:**  
+  http://googleusercontent.com/youtube.com/docker-postgresql-node
+
+---
+
+## Exemplo Prático Completo para o Controller de Agentes
+
+Vou deixar um exemplo de como você pode reescrever seu controller para lidar com async/await e usar o repositório corretamente:
+
+```js
+const agentesRepository = require("../repositories/agentesRepository");
+
+async function getAllController(req, res) {
+    try {
+        let agentes = await agentesRepository.getAll();
+        const { sortBy, order } = req.query;
+
+        if (sortBy === 'dataDeIncorporacao') {
+            agentes.sort((a, b) => {
+                const dateA = new Date(a.dataDeIncorporacao);
+                const dateB = new Date(b.dataDeIncorporacao);
+                if (order === 'desc') {
+                    return dateB - dateA;
+                }
+                return dateA - dateB;
+            });
+        }
+
+        res.status(200).json(agentes);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
+}
+
+async function getAgentByIDController(req, res) {
+    try {
+        const { id } = req.params;
+        const agente = await agentesRepository.read(id);
+        if (!agente) {
+            return res.status(404).json({ message: "Agente não cadastrado no banco de dados!" });
+        }
+        res.status(200).json(agente);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
+}
+
+// Similar para createAgentController, updateAgentController, patchAgentController e deleteAgentController
+```
+
+---
+
+## Resumo Rápido dos Pontos para Focar:
+
+- 🔑 **Use async/await em todos os controllers que acessam o banco e aguarde as promises do repositório.**
+- 🔄 **Alinhe os nomes dos métodos do repositório com o que você chama nos controllers.**
+- 📋 **Implemente os métodos `getAll`, `getAgentByID` (ou `read`), etc., que estão faltando nos repositórios.**
+- 🧩 **Consistência entre o tipo de ID no banco (INT ou UUID) e sua API/Swagger.**
+- 🔄 **Ajuste seus seeds para usar apenas `TRUNCATE` para limpar as tabelas.**
+- 🛠️ **Adicione tratamento de erros com try/catch para garantir estabilidade da API.**
+
+---
+
+Você já está com uma base muito boa, só precisa desses ajustes para fazer sua API funcionar de ponta a ponta com o banco PostgreSQL! 💪
+
+Continue nessa pegada, que você vai dominar essa stack rapidinho! Se quiser, posso te ajudar a revisar um exemplo mais completo de controller com async/await para você usar como base. 😉
+
+Boa sorte e bora codar! 🚓✨
+
+---
+
+Se quiser revisitar os conceitos de async/await e Knex, aqui estão os links novamente para facilitar:
+
+- https://knexjs.org/guide/query-builder.html  
+- https://knexjs.org/guide/migrations.html  
+- https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_  
+- http://googleusercontent.com/youtube.com/docker-postgresql-node
+
+Se precisar, só chamar! Estou aqui para ajudar. 🤖💙
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
