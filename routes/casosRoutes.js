@@ -22,8 +22,8 @@ const casosController = require('../controllers/casosController');
  *         - agente_id
  *       properties:
  *         id:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         titulo:
  *           type: string
  *         descricao:
@@ -32,14 +32,14 @@ const casosController = require('../controllers/casosController');
  *           type: string
  *           enum: [aberto, solucionado]
  *         agente_id:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *       example:
- *         id: "cfd686d4-957c-4ca5-85bf-2895ca535569"
+ *         id: "1"
  *         titulo: "Investigação de Homicídio"
  *         descricao: "Vítima encontrada em área urbana. Suspeito identificado."
  *         status: "aberto"
- *         agente_id: "401bccf5-cf9e-489d-8412-446cd169a0f1"
+ *         agente_id: "2"
 
  *     NewCaso:
  *       type: object
@@ -57,13 +57,13 @@ const casosController = require('../controllers/casosController');
  *           type: string
  *           enum: [aberto, solucionado]
  *         agente_id:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *       example:
  *         titulo: "Investigação de Homicídio"
  *         descricao: "Vítima encontrada em área urbana. Suspeito identificado."
  *         status: "aberto"
- *         agente_id: "401bccf5-cf9e-489d-8412-446cd169a0f1"
+ *         agente_id: "1"
  */
 
 /**
@@ -82,8 +82,8 @@ const casosController = require('../controllers/casosController');
  *       - in: query
  *         name: agente_id
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         description: "Filtra os casos pelo ID do agente responsável."
  *       - in: query
  *         name: search
@@ -113,8 +113,8 @@ router.get('', casosController.getCasosController);
  *         name: id
  *         schema:
  *           type: string
- *           format: uuid
- *         required: true
+ *           format: integer
+ *         required: int64
  *         description: "O ID do caso."
  *     responses:
  *       200:
@@ -164,8 +164,8 @@ router.post('', casosController.createCaseController);
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         required: true
  *         description: "O ID do caso a ser atualizado."
  *     requestBody:
@@ -194,8 +194,8 @@ router.put('/:id', casosController.updateCaseController);
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         required: true
  *         description: "O ID do caso a ser atualizado."
  *     requestBody:
@@ -213,8 +213,8 @@ router.put('/:id', casosController.updateCaseController);
  *                 type: string
  *                 enum: [aberto, solucionado]
  *               agente_id:
- *                 type: string
- *                 format: uuid
+ *                 type: integer
+ *                 format: int64
  *             example:
  *               status: "solucionado"
  *     responses:
@@ -237,8 +237,8 @@ router.patch('/:id', casosController.patchCaseController);
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         required: true
  *         description: "O ID do caso a ser deletado."
  *     responses:

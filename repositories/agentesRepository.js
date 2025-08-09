@@ -1,6 +1,6 @@
 const db = require("../db/db")
 
-async function create(data) {
+async function createAgent(data) {
     try {
         
         const created = await db("agentes").insert(data, ["*"])
@@ -13,7 +13,7 @@ async function create(data) {
     }
 }
 
-async function read(id) {
+async function getAgentByID(id) {
     try {
         
         const result = await db("agentes").where({id:id})
@@ -30,7 +30,7 @@ async function read(id) {
     }
 }
 
-async function update(id, data) {
+async function updateAgent(id, data) {
     try {
         
         const updated = await db("agentes").where({id:id}).update(data,["*"]) 
@@ -47,7 +47,7 @@ async function update(id, data) {
     }
 }
 
-async function remove(id) {
+async function deleteAgent(id) {
 
     try {
         
@@ -67,3 +67,14 @@ async function remove(id) {
     
 }
 
+async function getAll() {
+    try {
+        const agentes = await db("agentes").select("*");
+        return agentes;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+module.exports = { getAll, getAgentByID ,createAgent, updateAgent, deleteAgent };

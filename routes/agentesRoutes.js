@@ -21,8 +21,8 @@ const agentesController = require('../controllers/agentesController');
 *         - cargo
 *       properties:
 *         id:
-*           type: string
-*           format: uuid
+*           type: integer
+*           format: int64
 *           description: O ID gerado automaticamente para o agente.
 *         nome:
 *           type: string
@@ -100,8 +100,8 @@ router.get('', agentesController.getAllController);
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         required: true
  *         description: "O ID do agente."
  *     responses:
@@ -150,8 +150,8 @@ router.post('', agentesController.createAgentController);
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         required: true
  *         description: "O ID do agente a ser atualizado."
  *     requestBody:
@@ -180,8 +180,8 @@ router.put('/:id', agentesController.updateAgentController);
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         required: true
  *         description: "O ID do agente a ser atualizado."
  *     requestBody:
@@ -220,8 +220,8 @@ router.patch('/:id', agentesController.patchAgentController);
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
+ *           format: int64
  *         required: true
  *         description: "O ID do agente a ser deletado."
  *     responses:

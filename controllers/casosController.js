@@ -1,7 +1,7 @@
 const casosRepository = require("../repositories/casosRepository");
 const agentesRepository = require("../repositories/agentesRepository");
 
-function validateNewCase(data, res) {
+async function validateNewCase(data, res) {
     if (!data.titulo || typeof data.titulo !== 'string' || data.titulo.trim() === '') {
         res.status(400).json({ message: "O campo 'titulo' é obrigatório." });
         return false;
@@ -14,11 +14,14 @@ function validateNewCase(data, res) {
         res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
         return false;
     }
-    if (!data.agente_id || !agentesRepository.getAgentByID(data.agente_id)) {
-        res.status(404).json({ message: "Agente responsável não encontrado." });
-        return false;
+       if (!data.agente_id) {
+        return { valid: false, status: 400, message: "O campo 'agente_id' é obrigatório." };
     }
-    return true;
+    const agentExists = await agentesRepository.read(data.agente_id);
+    if (!agentExists) {
+        return { valid: false, status: 404, message: "Agente responsável não encontrado." };
+    }
+    return { valid: true };
 }
 
 function validatePutCase(data, res) {
@@ -81,9 +84,9 @@ function checkExist(id, res) {
 }
 
 
-function getCasosController(req, res) {
-   
-    let casos = casosRepository.getAll();
+async function getCasosController(req, res) {
+   try{
+    let casos = await casosRepository.getAll();
     const { status, agente_id, search } = req.query;
 
     if (status) {
@@ -101,48 +104,77 @@ function getCasosController(req, res) {
     }
 
     res.status(200).json(casos);
+}catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
 }
 
-function getCaseByIDController(req, res) {
+async function getCaseByIDController(req, res) {
+    try{
         const { id } = req.params;
-        const caso = checkExist(id, res);
+        const caso = await checkExist(id, res);
         if (!caso) return; 
         res.status(200).json(caso);
+    }catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
 }
 
-function createCaseController(req,res){
+async function createCaseController(req,res){
+    try{
         const data = req.body;
         if (!validateNewCase(data, res)) {
         return;
         }
-        const newCase = casosRepository.createCase(data);
+        const newCase = await casosRepository.createCase(data);
         res.status(201).json(newCase);
+    }catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
 }
 
-function updateCaseController(req,res){
+async function updateCaseController(req,res){
+    try{
         const { id } = req.params;
         const data = req.body;
          if (!checkExist(id, res)) return;
         if (!validatePutCase(data, res)) return;
-        const updatedCase = casosRepository.updateCase(id, data);
+        const updatedCase = await casosRepository.updateCase(id, data);
         res.status(200).json(updatedCase);
+    }catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
 }
 
-function patchCaseController(req,res){
+async function patchCaseController(req,res){
+    try{
         const { id } = req.params;
          const data = req.body;
          if (!checkExist(id, res)) return;
         if (!validatePatchCase(data, res)) return;
-        const patchedCase = casosRepository.patchCase(id, data);
+        const patchedCase = await casosRepository.patchCase(id, data);
          res.status(200).json(patchedCase);
+    }catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
 }
 
-function deleteCaseController(req,res){
+async function deleteCaseController(req,res){
+    try{
         const { id } = req.params;
         if (!checkExist(id, res)) return;
-        casosRepository.deleteCase(id);
+        await casosRepository.deleteCase(id);
         res.status(204).send();
-
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+    }
         
 }
 

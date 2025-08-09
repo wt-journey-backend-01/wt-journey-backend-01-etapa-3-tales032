@@ -88,8 +88,8 @@ function validatePatchAgent(data, res) {
 }
 
 
-function checkExist(id, res) {
-    const agente = agentesRepository.getAgentByID(id);
+async function checkExist(id, res) {
+    const agente = await agentesRepository.getAgentByID(id);
     if (!agente) {
         res.status(404).json({ message: "Agente não cadastrado no banco de dados!" });
         return null;
@@ -97,8 +97,9 @@ function checkExist(id, res) {
     return agente; 
 }
 
-function getAllController(req, res) {
-   let agentes = agentesRepository.getAll();
+async function getAllController(req, res) {
+   try{
+    let agentes = await agentesRepository.getAll();
    const { sortBy, order } = req.query; 
 
    if (sortBy === 'dataDeIncorporacao') {
@@ -111,51 +112,80 @@ function getAllController(req, res) {
            return dateA - dateB;
        });
    }
-
+   
    res.status(200).json(agentes);
+
+}   catch(error){
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+}
 }
 
-function getAgentByIDController(req, res) {
-        const { id } = req.params;
-        const agente = checkExist(id, res);
+async function getAgentByIDController(req, res) {
+    try{
+        const { id } =  req.params;
+        const agente = await checkExist(id, res);
          if (!agente) return; 
         res.status(200).json(agente);
+    } catch(error){
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+}
 }
 
-function createAgentController(req, res) {
+async function createAgentController(req, res) {
+    try{
          const data = req.body;
          if (!validateNewAgent(data, res)) {
         return;
         }
-        const newAgent = agentesRepository.createAgent(data);
+        const newAgent = await agentesRepository.createAgent(data);
         res.status(201).json(newAgent);
-
+    }catch(error){
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+}
 }
 
-function updateAgentController(req,res){
+async function updateAgentController(req,res){
+    try{
        const { id } = req.params;
        const data = req.body;
        if (!checkExist(id, res)) return;
        if (!validatePutAgent(data, res)) return;
-       const updatedAgent = agentesRepository.updateAgent(id, data); 
+       const updatedAgent = await agentesRepository.updateAgent(id, data); 
        res.status(200).json(updatedAgent);
+    }catch(error){
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+}
 }
 
-function patchAgentController(req,res){
+async function patchAgentController(req,res){
+    try{
        const { id } = req.params;
        const data = req.body;
        if (!checkExist(id, res)) return;
        if (!validatePatchAgent(data, res)) return;
-       const patchedAgent = agentesRepository.patchAgent(id, data); 
+       const patchedAgent = await agentesRepository.patchAgent(id, data); 
        res.status(200).json(patchedAgent);
+    }catch(error){
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+}
 }
 
 
-function deleteAgentController(req,res){
+async function deleteAgentController(req,res){
+    try{
          const { id } = req.params;
          if (!checkExist(id, res)) return;
-        agentesRepository.deleteAgent(id);
+        await agentesRepository.deleteAgent(id);
          res.status(204).send();
+    }catch(error){
+        console.error(error);
+        res.status(500).json({ message: "Erro interno do servidor." });
+}
 }
 
 module.exports = {

@@ -1,6 +1,6 @@
 const db = require("../db/db")
 
-async function create(data) {
+async function createCase(data) {
     try {
         
         const created = await db("casos").insert(data, ["*"])
@@ -13,7 +13,7 @@ async function create(data) {
     }
 }
 
-async function read(id) {
+async function getCaseByID(id) {
     try {
         
         const result = await db("casos").where({id:id})
@@ -30,7 +30,7 @@ async function read(id) {
     }
 }
 
-async function update(id, data) {
+async function updateCase(id, data) {
     try {
         
         const updated = await db("casos").where({id:id}).update(data,["*"]) 
@@ -47,7 +47,7 @@ async function update(id, data) {
     }
 }
 
-async function remove(id) {
+async function deleteCase(id) {
 
     try {
         
@@ -66,3 +66,15 @@ async function remove(id) {
     }
     
 }
+
+async function getAll() {
+    try {
+        const agentes = await db("casos").select("*");
+        return agentes;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+module.exports = { getAll, getCaseByID ,createCase, updateCase, deleteCase };
