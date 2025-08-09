@@ -56,15 +56,18 @@ async function deleteAgent(id) {
     }
 }
 
-async function getAll(sortBy, order) {
+async function getAll(sortBy = 'id', order = 'asc') {
     try {
-       
         let query = db("agentes").select("*");
 
-       const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo'];
-        if (sortBy && validSortFields.includes(sortBy) && ['asc', 'desc'].includes(order)) {
-        query = query.orderBy(sortBy, order);
-}       
+        const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo'];
+        if (sortBy && validSortFields.includes(sortBy)) {
+            const validOrders = ['asc', 'desc'];
+            const orderLower = order ? order.toLowerCase() : 'asc';
+            if (validOrders.includes(orderLower)) {
+                query = query.orderBy(sortBy, orderLower);
+            }
+        }       
         const agentes = await query;
         return agentes;
     } catch (error) {
@@ -72,7 +75,6 @@ async function getAll(sortBy, order) {
         return false;
     }
 }
-
 
 
 module.exports = { getAll, getAgentByID ,createAgent, updateAgent, deleteAgent, patchAgent: updateAgent };

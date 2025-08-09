@@ -117,7 +117,7 @@ async function createAgentController(req, res) {
         }
         
         const newAgent = await agentesRepository.createAgent(data);
-        res.status(201).json(newAgent[0]);
+        res.status(201).json(newAgent);
     }catch(error){
         console.error(error);
         res.status(500).json({ message: "Erro interno do servidor." });

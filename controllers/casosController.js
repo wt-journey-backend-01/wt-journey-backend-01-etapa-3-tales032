@@ -52,8 +52,18 @@ async function validateCaso(data, isPatch = false) {
 
 async function getCasosController(req, res) {
    try {
+        const filtros = req.query;
+
+      
+        if (filtros.status && !['aberto', 'solucionado'].includes(filtros.status)) {
+            return res.status(400).json({ message: "Status inválido. Use apenas 'aberto' ou 'solucionado'." });
+        }
+
+        if (filtros.agente_id && isNaN(Number(filtros.agente_id))) {
+            return res.status(400).json({ message: "O filtro 'agente_id' deve ser um número." });
+        }
+
         
-        const filtros = req.query; 
         const casos = await casosRepository.getAll(filtros);
         
         res.status(200).json(casos);
