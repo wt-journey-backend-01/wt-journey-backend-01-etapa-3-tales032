@@ -73,14 +73,23 @@ function validatePatchAgent(data) {
 
 
 async function getAllController(req, res) {
-    try {
-        const { sortBy, order } = req.query;
-       
-        const agentes = await agentesRepository.getAll(sortBy, order);
-        res.status(200).json(agentes);
-    } catch (error) {
-        res.status(500).json({ message: "Erro interno do servidor." });
+  try {
+    const { sortBy, order } = req.query;
+    const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo'];
+    const validOrders = ['asc', 'desc'];
+
+    if (sortBy && !validSortFields.includes(sortBy)) {
+      return res.status(400).json({ message: `sortBy inválido. Use um dos seguintes: ${validSortFields.join(', ')}` });
     }
+    if (order && !validOrders.includes(order)) {
+      return res.status(400).json({ message: `order inválido. Use 'asc' ou 'desc'.` });
+    }
+
+    const agentes = await agentesRepository.getAll(sortBy, order);
+    res.status(200).json(agentes);
+  } catch (error) {
+    res.status(500).json({ message: "Erro interno do servidor." });
+  }
 }
 
 async function getAgentByIDController(req, res) {

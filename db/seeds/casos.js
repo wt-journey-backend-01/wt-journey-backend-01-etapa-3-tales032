@@ -4,7 +4,7 @@
  */
 exports.seed = async function(knex) {
 
-  await knex('casos').del();
+   await knex.raw('TRUNCATE TABLE casos RESTART IDENTITY CASCADE');
   
 
   await knex('casos').insert([

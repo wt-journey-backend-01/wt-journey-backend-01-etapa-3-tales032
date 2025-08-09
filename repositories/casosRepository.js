@@ -31,40 +31,30 @@ async function getCaseByID(id) {
 }
 
 async function updateCase(id, data) {
-    try {
-        
-        const updated = await db("casos").where({ id: id }).update(data).returning("*");
-
-        if (updated.length === 0) {
-            return false; 
-        }
-        return updated[0]
-
-    } catch (error) {
-
-        console.log(error)
-        return false
+  try {
+    const updated = await db("casos")
+      .where({ id: id })
+      .update(data)
+      .returning("*");
+    if (!updated || updated.length === 0) {
+      return null; 
     }
+    return updated[0];
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 }
 
 async function deleteCase(id) {
 
-    try {
-        
-        const deleted = await db("casos").where({id: id}).del()
-
-         if(!deleted){
-            return false
-        }
-        return true;
-
-
+  try {
+        const deleted = await db("casos").where({ id: id }).del();
+        return deleted > 0; 
     } catch (error) {
-        
-        console.log(error)
-        return false
+        console.log(error);
+        return false;
     }
-    
 }
 
 async function getAll(filtros) { 

@@ -31,19 +31,19 @@ async function getAgentByID(id) {
 }
 
 async function updateAgent(id, data) {
-    try {
-        
-        const updated = await db("agentes").where({ id: id }).update(data).returning("*");
-        if(!updated){
-            return false
-        }
-        return updated[0]
-
-    } catch (error) {
-
-        console.log(error)
-        return false
+  try {
+    const updated = await db("agentes")
+      .where({ id: id })
+      .update(data)
+      .returning("*");
+    if (!updated || updated.length === 0) {
+      return null; 
     }
+    return updated[0];
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 }
 
 async function deleteAgent(id) {
