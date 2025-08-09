@@ -1,196 +1,172 @@
 const casosRepository = require("../repositories/casosRepository");
 const agentesRepository = require("../repositories/agentesRepository");
 
-async function validateNewCase(data, res) {
+
+
+async function validateCaso(data, isPatch = false) {
+
+    if (isPatch) {
+        if (data.id) return { isValid: false, message: "Não é permitido alterar o ID de um caso." };
+        if (data.titulo !== undefined && (typeof data.titulo !== 'string' || data.titulo.trim() === '')) {
+            return { isValid: false, message: "O campo 'titulo' deve ser uma string não vazia." };
+        }
+        if (data.descricao !== undefined && (typeof data.descricao !== 'string' || data.descricao.trim() === '')) {
+            return { isValid: false, message: "O campo 'descricao' deve ser uma string não vazia." };
+        }
+        if (data.status !== undefined && !['aberto', 'solucionado'].includes(data.status)) {
+            return { isValid: false, message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." };
+        }
+       
+        if (data.agente_id !== undefined) {
+            const agentExists = await agentesRepository.getAgentByID(data.agente_id);
+            if (!agentExists) {
+                return { isValid: false, status: 404, message: "Novo agente responsável não encontrado." };
+            }
+        }
+        return { isValid: true };
+    }
+
     if (!data.titulo || typeof data.titulo !== 'string' || data.titulo.trim() === '') {
-        res.status(400).json({ message: "O campo 'titulo' é obrigatório." });
-        return false;
+        return { isValid: false, message: "O campo 'titulo' é obrigatório." };
     }
     if (!data.descricao || typeof data.descricao !== 'string' || data.descricao.trim() === '') {
-        res.status(400).json({ message: "O campo 'descricao' é obrigatório." });
-        return false;
+        return { isValid: false, message: "O campo 'descricao' é obrigatório." };
     }
     if (!data.status || !['aberto', 'solucionado'].includes(data.status)) {
-        res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
-        return false;
+        return { isValid: false, message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." };
     }
-       if (!data.agente_id) {
-        return { valid: false, status: 400, message: "O campo 'agente_id' é obrigatório." };
+    if (!data.agente_id) {
+        return { isValid: false, message: "O campo 'agente_id' é obrigatório." };
     }
-    const agentExists = await agentesRepository.getCaseByID(data.agente_id);
+
+
+    const agentExists = await agentesRepository.getAgentByID(data.agente_id);
     if (!agentExists) {
-        return { valid: false, status: 404, message: "Agente responsável não encontrado." };
+        return { isValid: false, status: 404, message: "Agente responsável não encontrado." };
     }
-    return { valid: true };
+
+    return { isValid: true };
 }
 
-async function validatePutCase(data, res) {
-  if (data.id) {
-      res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
-      return false;
-  }
-  
-
-  if (!data.titulo || typeof data.titulo !== 'string' || data.titulo.trim() === '') {
-      res.status(400).json({ message: "O campo 'titulo' é obrigatório." });
-      return false;
-  }
-  if (!data.descricao || typeof data.descricao !== 'string' || data.descricao.trim() === '') {
-      res.status(400).json({ message: "O campo 'descricao' é obrigatório." });
-      return false;
-  }
-  if (!data.status || !['aberto', 'solucionado'].includes(data.status)) {
-      res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
-      return false;
-  }
-  const agent = await agentesRepository.getCaseByID(data.agente_id); 
-  if (!agent) {
-    res.status(404).json({ message: "Agente responsável não encontrado." });
-    return false;
-  }
-  return true;
-}
-
-await function validatePatchCase(data, res) {
-  if (data.id) {
-      res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
-      return false;
-  }
-  if (data.titulo !== undefined && (typeof data.titulo !== 'string' || data.titulo.trim() === '')) {
-      res.status(400).json({ message: "O campo 'titulo' deve ser uma string não vazia." });
-      return false;
-  }
-  if (data.descricao !== undefined && (typeof data.descricao !== 'string' || data.descricao.trim() === '')) {
-      res.status(400).json({ message: "O campo 'descricao' deve ser uma string não vazia." });
-      return false;
-  }
-  if (data.status !== undefined && !['aberto', 'solucionado'].includes(data.status)) {
-      res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
-      return false;
-  }
-  if (data.agente_id !== undefined && !agentesRepository.getAgentByID(data.agente_id)) {
-      res.status(404).json({ message: "Novo agente responsável não encontrado." });
-      return false;
-  }
-  return true;
-}
-
-async function checkExist(id, res) {
-    const caso = await casosRepository.getCaseByID(id);
-    if (!caso) {
-        res.status(404).json({ message: "Caso não cadastrado no banco de dados!" });
-        return null;
-    }
-    return caso; 
-}
 
 
 async function getCasosController(req, res) {
-   try{
-    let casos = await casosRepository.getAll();
-    const { status, agente_id, search } = req.query;
+   try {
+    
+        let casos = await casosRepository.getAll();
+        const { status, agente_id, search } = req.query;
 
-    if (status) {
-        casos = casos.filter(caso => caso.status === status);
-    }
-    if (agente_id) {
-        casos = casos.filter(caso => caso.agente_id === agente_id);
-    }
-    if (search) {
-        const lowerSearch = search.toLowerCase();
-        casos = casos.filter(caso =>
-            caso.titulo.toLowerCase().includes(lowerSearch) ||
-            caso.descricao.toLowerCase().includes(lowerSearch)
-        );
-    }
-
-    res.status(200).json(casos);
-}catch (error) {
-        console.error(error);
+        if (status) {
+            casos = casos.filter(caso => caso.status === status);
+        }
+        if (agente_id) {
+            casos = casos.filter(caso => caso.agente_id == agente_id); 
+        }
+        if (search) {
+            const lowerSearch = search.toLowerCase();
+            casos = casos.filter(caso =>
+                caso.titulo.toLowerCase().includes(lowerSearch) ||
+                caso.descricao.toLowerCase().includes(lowerSearch)
+            );
+        }
+        res.status(200).json(casos);
+    } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
     }
 }
 
 async function getCaseByIDController(req, res) {
-    try{
-        const { id } = req.params;
-        if (isNaN(id)) {
-        return res.status(400).json({ message: "O ID deve ser um número." });
+    try {
+        const id = Number(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ message: "O ID deve ser um número." });
+
+        const caso = await casosRepository.getCaseByID(id);
+        if (!caso) {
+            return res.status(404).json({ message: "Caso não encontrado." });
         }
-        const caso = await checkExist(id, res);
-        if (!caso) return; 
         res.status(200).json(caso);
-    }catch (error) {
-        console.error(error);
+    } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
     }
 }
 
-async function createCaseController(req,res){
-    try{
+async function createCaseController(req, res) {
+    try {
         const data = req.body;
-        const validation = await validateNewCase(data, res);
-       if (!validation.valid) {
-        res.status(validation.status).json({ message: validation.message });
-        return;
+        const validation = await validateCaso(data, false); 
+
+        if (!validation.isValid) {
+            return res.status(validation.status || 400).json({ message: validation.message });
         }
+
         const newCase = await casosRepository.createCase(data);
-        res.status(201).json(newCase);
-    }catch (error) {
-        console.error(error);
+        res.status(201).json(newCase[0]);
+    } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
     }
 }
 
-async function updateCaseController(req,res){
-    try{
-        const { id } = req.params;
-        if (isNaN(id)) {
-        return res.status(400).json({ message: "O ID deve ser um número." });
+async function updateCaseController(req, res) {
+    try {
+        const id = Number(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ message: "O ID deve ser um número." });
+
+        const caseExists = await casosRepository.getCaseByID(id);
+        if (!caseExists) {
+            return res.status(404).json({ message: "Caso não encontrado." });
         }
+
         const data = req.body;
-         if (!checkExist(id, res)) return;
-        if (!validatePutCase(data, res)) return;
+        const validation = await validateCaso(data, false); 
+        if (!validation.isValid) {
+            return res.status(validation.status || 400).json({ message: validation.message });
+        }
+
         const updatedCase = await casosRepository.updateCase(id, data);
-        res.status(200).json(updatedCase);
-    }catch (error) {
-        console.error(error);
+        res.status(200).json(updatedCase[0]);
+    } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
     }
 }
 
-async function patchCaseController(req,res){
-    try{
-        const { id } = req.params;
-        if (isNaN(id)) {
-        return res.status(400).json({ message: "O ID deve ser um número." });
+async function patchCaseController(req, res) {
+    try {
+        const id = Number(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ message: "O ID deve ser um número." });
+
+        const caseExists = await casosRepository.getCaseByID(id);
+        if (!caseExists) {
+            return res.status(404).json({ message: "Caso não encontrado." });
         }
-         const data = req.body;
-         if (!checkExist(id, res)) return;
-        if (!validatePatchCase(data, res)) return;
+
+        const data = req.body;
+        const validation = await validateCaso(data, true); 
+        if (!validation.isValid) {
+            return res.status(validation.status || 400).json({ message: validation.message });
+        }
+
         const patchedCase = await casosRepository.patchCase(id, data);
-         res.status(200).json(patchedCase);
-    }catch (error) {
-        console.error(error);
+        res.status(200).json(patchedCase[0]);
+    } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
     }
 }
 
-async function deleteCaseController(req,res){
-    try{
-        const { id } = req.params;
-        if (isNaN(id)) {
-        return res.status(400).json({ message: "O ID deve ser um número." });
+async function deleteCaseController(req, res) {
+    try {
+        const id = Number(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ message: "O ID deve ser um número." });
+
+        const caseExists = await casosRepository.getCaseByID(id);
+        if (!caseExists) {
+            return res.status(404).json({ message: "Caso não encontrado." });
         }
-        if (!checkExist(id, res)) return;
+
         await casosRepository.deleteCase(id);
         res.status(204).send();
-    }
-    catch (error) {
-        console.error(error);
+    } catch (error) {
         res.status(500).json({ message: "Erro interno do servidor." });
     }
-        
 }
 
 module.exports = {
@@ -200,5 +176,4 @@ module.exports = {
    updateCaseController,
    deleteCaseController,
    patchCaseController
-   
-}
+};
