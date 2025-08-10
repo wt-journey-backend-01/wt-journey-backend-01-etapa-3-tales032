@@ -2,49 +2,41 @@ const db = require("../db/db");
 
 async function createAgent(data) {
 try {
-  const [createdAgent] = await db("agentes").insert(data).returning("*");
-  return createdAgent;
+  const result = await db("agentes").insert(data).returning("*");
+  return result[0];
 } catch (err) {
-  console.error(err);
-  return false;
+  console.error("Erro ao criar agente:", err);
+  throw err;
 }
 }
 
 async function getAgentByID(id) {
 try {
-  const result = await db("agentes").where({ id });
-  if (result.length === 0) return null;
-  return result[0];
+  const result = await db("agentes").where({ id }).first();
+  return result || null;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao buscar agente:", error);
+  throw error;
 }
 }
 
 async function updateAgent(id, data) {
 try {
-  const updated = await db("agentes").where({ id }).update(data).returning("*");
-  if (!updated || updated.length === 0) return null;
-  return updated[0];
+  const result = await db("agentes").where({ id }).update(data).returning("*");
+  return result[0] || null;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao atualizar agente:", error);
+  throw error;
 }
 }
 
 async function patchAgent(id, data) {
 try {
-
-  const existingAgent = await db("agentes").where({ id }).first();
-  if (!existingAgent) return null;
-
-  const updatedData = { ...existingAgent, ...data };
-  const updated = await db("agentes").where({ id }).update(updatedData).returning("*");
-  if (!updated || updated.length === 0) return null;
-  return updated[0];
+  const result = await db("agentes").where({ id }).update(data).returning("*");
+  return result[0] || null;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao fazer patch do agente:", error);
+  throw error;
 }
 }
 
@@ -53,14 +45,15 @@ try {
   const deleted = await db("agentes").where({ id }).del();
   return deleted > 0;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao deletar agente:", error);
+  throw error;
 }
 }
 
 async function getAll(sortBy = 'id', order = 'asc') {
 try {
   let query = db("agentes").select("*");
+  
   const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo', 'id'];
   const validOrders = ['asc', 'desc'];
 
@@ -70,14 +63,14 @@ try {
       query = query.orderBy(sortBy, orderLower);
     }
   } else {
-
     query = query.orderBy('id', 'asc');
   }
 
-  return await query;
+  const result = await query;
+  return result;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao buscar agentes:", error);
+  throw error;
 }
 }
 
@@ -86,6 +79,6 @@ getAll,
 getAgentByID,
 createAgent,
 updateAgent,
-patchAgent, 
+patchAgent,
 deleteAgent
 };

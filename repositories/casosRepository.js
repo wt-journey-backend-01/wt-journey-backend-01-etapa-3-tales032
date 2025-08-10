@@ -2,49 +2,41 @@ const db = require("../db/db");
 
 async function createCase(data) {
 try {
-  const [createdCase] = await db("casos").insert(data).returning("*");
-  return createdCase; 
+  const result = await db("casos").insert(data).returning("*");
+  return result[0];
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao criar caso:", error);
+  throw error;
 }
 }
 
 async function getCaseByID(id) {
 try {
-  const result = await db("casos").where({ id });
-  if (result.length === 0) return null;
-  return result[0];
+  const result = await db("casos").where({ id }).first();
+  return result || null;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao buscar caso:", error);
+  throw error;
 }
 }
 
 async function updateCase(id, data) {
 try {
-  const updated = await db("casos").where({ id }).update(data).returning("*");
-  if (!updated || updated.length === 0) return null;
-  return updated[0];
+  const result = await db("casos").where({ id }).update(data).returning("*");
+  return result[0] || null;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao atualizar caso:", error);
+  throw error;
 }
 }
 
 async function patchCase(id, data) {
 try {
-
-  const existingCase = await db("casos").where({ id }).first();
-  if (!existingCase) return null;
-
-  const updatedData = { ...existingCase, ...data };
-  const updated = await db("casos").where({ id }).update(updatedData).returning("*");
-  if (!updated || updated.length === 0) return null;
-  return updated[0];
+  const result = await db("casos").where({ id }).update(data).returning("*");
+  return result[0] || null;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao fazer patch do caso:", error);
+  throw error;
 }
 }
 
@@ -53,8 +45,8 @@ try {
   const deleted = await db("casos").where({ id }).del();
   return deleted > 0;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao deletar caso:", error);
+  throw error;
 }
 }
 
@@ -75,13 +67,12 @@ try {
     });
   }
 
-  // Default ordering
   query = query.orderBy('id', 'asc');
-
-  return await query;
+  const result = await query;
+  return result;
 } catch (error) {
-  console.log(error);
-  return false;
+  console.error("Erro ao buscar casos:", error);
+  throw error;
 }
 }
 
@@ -90,6 +81,6 @@ getAll,
 getCaseByID,
 createCase,
 updateCase,
-patchCase, 
+patchCase,
 deleteCase
 };
