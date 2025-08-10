@@ -1,6 +1,5 @@
 const agentesRepository = require("../repositories/agentesRepository");
 
-// Função auxiliar para validar datas
 function isValidDate(dateString) {
 const regex = /^\d{4}-\d{2}-\d{2}$/;
 if (!regex.test(dateString)) return false;
@@ -18,7 +17,6 @@ return (
 );
 }
 
-// Validações
 function validateNewAgent(data) {
 if (!data.nome || typeof data.nome !== 'string' || data.nome.trim() === '') {
   return { isValid: false, message: "O campo 'nome' é obrigatório." };
@@ -64,7 +62,6 @@ if (data.cargo !== undefined && (typeof data.cargo !== 'string' || data.cargo.tr
 return { isValid: true };
 }
 
-// Controllers
 async function getAllController(req, res) {
 try {
   const { sortBy, order } = req.query;
