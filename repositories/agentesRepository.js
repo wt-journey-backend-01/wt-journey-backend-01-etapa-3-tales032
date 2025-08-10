@@ -1,72 +1,72 @@
-const db = require("../db/db")
+const db = require("../db/db");
 
 async function createAgent(data) {
 try {
-    const [createdAgente] = await db('agentes').insert(data, ['*']); // ← CORRIGIDO!
-    return createdAgente;
+  const [createdAgent] = await db("agentes").insert(data).returning("*");
+  return createdAgent;
 } catch (err) {
-    console.error(err);
-    return false;
+  console.error(err);
+  return false;
 }
 }
+
 async function getAgentByID(id) {
-  try {
-      const result = await db("agentes").where({id: id});
-      
-      if(result.length === 0){
-          return null; 
-      }
-      return result[0];
-  } catch (error) {
-      console.log(error);
-      return null; 
-  }
+try {
+  const result = await db("agentes").where({ id });
+  if (result.length === 0) return null;
+  return result[0];
+} catch (error) {
+  console.log(error);
+  return false;
 }
+}
+
 async function updateAgent(id, data) {
-  try {
-    const updated = await db("agentes")
-      .where({ id: id })
-      .update(data)
-      .returning("*");
-    if (!updated || updated.length === 0) {
-      return null; 
-    }
-    return updated[0];
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
+try {
+  const updated = await db("agentes").where({ id }).update(data).returning("*");
+  if (!updated || updated.length === 0) return null;
+  return updated[0];
+} catch (error) {
+  console.log(error);
+  return false;
+}
 }
 
 async function deleteAgent(id) {
-    try {
-        const deleted = await db("agentes").where({ id: id }).del();
-        return deleted > 0; 
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
+try {
+  const deleted = await db("agentes").where({ id }).del();
+  return deleted > 0;
+} catch (error) {
+  console.log(error);
+  return false;
+}
 }
 
 async function getAll(sortBy = 'id', order = 'asc') {
-    try {
-        let query = db("agentes").select("*");
+try {
+  let query = db("agentes").select("*");
+  const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo'];
+  const validOrders = ['asc', 'desc'];
 
-        const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo'];
-        if (sortBy && validSortFields.includes(sortBy)) {
-            const validOrders = ['asc', 'desc'];
-            const orderLower = order ? order.toLowerCase() : 'asc';
-            if (validOrders.includes(orderLower)) {
-                query = query.orderBy(sortBy, orderLower);
-            }
-        }       
-        const agentes = await query;
-        return agentes;
-    } catch (error) {
-        console.log(error);
-        return false;
+  if (sortBy && validSortFields.includes(sortBy)) {
+    const orderLower = order ? order.toLowerCase() : 'asc';
+    if (validOrders.includes(orderLower)) {
+      query = query.orderBy(sortBy, orderLower);
     }
+  }
+
+  return await query;
+} catch (error) {
+  console.log(error);
+  return false;
+}
 }
 
-
-module.exports = { getAll, getAgentByID ,createAgent, updateAgent, deleteAgent, patchAgent: updateAgent };
+module.exports = {
+getAll,
+getAgentByID,
+createAgent,
+updateAgent,
+deleteAgent,
+patchAgent: updateAgent
+};
