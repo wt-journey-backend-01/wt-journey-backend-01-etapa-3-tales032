@@ -2,14 +2,14 @@
 
 # 🧪 Relatório de Avaliação – Journey Levty Etapa 1 - tales032
 
-**Data:** 10/08/2025 03:34
+**Data:** 10/08/2025 03:37
 
-**Nota Final:** `20.18/100`
+**Nota Final:** `34.64/100`
 **Status:** ❌ Reprovado
 
 ---
 ## ✅ Requisitos Obrigatórios
-- Foram encontrados `21` problemas nos requisitos obrigatórios. Veja abaixo os testes que falharam:
+- Foram encontrados `17` problemas nos requisitos obrigatórios. Veja abaixo os testes que falharam:
   - ⚠️ **Falhou no teste**: `CREATE: Cria agentes corretamente`
     - **Melhoria sugerida**: A criação de agentes (`POST /agentes`) não está conforme o esperado. O teste esperava um status `201 Created` e os dados do agente no corpo da resposta. Verifique a lógica da sua rota para garantir que o agente é salvo e a resposta é formatada corretamente.
   - ⚠️ **Falhou no teste**: `READ: Lista todos os agente corretamente`
@@ -44,14 +44,6 @@
     - **Melhoria sugerida**: A exclusão de caso (`DELETE /casos/:id`) não funcionou como esperado. O teste esperava um status `204 No Content` e que o caso fosse realmente removido. Verifique a lógica de exclusão na sua rota.
   - ⚠️ **Falhou no teste**: `CREATE: Recebe status code 404 ao tentar criar caso com id de agente inválido/inexistente`
     - **Melhoria sugerida**: Ao tentar criar um caso com um `agente_id` inexistente, o teste não recebeu `404 Not Found`. Sua API deve ser capaz de identificar que o agente referenciado não existe e retornar o status apropriado.
-  - ⚠️ **Falhou no teste**: `READ: Recebe status code 404 ao tentar buscar um caso por ID inválido`
-    - **Melhoria sugerida**: Ao tentar buscar um caso com ID inexistente (`GET /casos/:id`), o teste não recebeu `404 Not Found`. Sua rota deve ser capaz de identificar que o recurso não existe e retornar o status apropriado.
-  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 404 ao tentar atualizar um caso por completo com método PUT de um caso inexistente`
-    - **Melhoria sugerida**: Ao tentar atualizar um caso inexistente com `PUT /casos/:id`, o teste não recebeu `404 Not Found`. A rota deve indicar que o recurso não foi encontrado.
-  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 404 ao tentar atualizar um caso parcialmente com método PATCH de um caso inexistente`
-    - **Melhoria sugerida**: Ao tentar atualizar um caso inexistente com `PATCH /casos/:id`, o teste não recebeu `404 Not Found`. Certifique-se de que sua rota verifica a existência do recurso antes de tentar a atualização.
-  - ⚠️ **Falhou no teste**: `DELETE: Recebe status code 404 ao tentar deletar um caso inexistente`
-    - **Melhoria sugerida**: Ao tentar deletar um caso com ID inexistente (`DELETE /casos/:id`), o teste não recebeu `404 Not Found`. Sua rota deve sinalizar quando o recurso a ser deletado não é encontrado.
 
 ## ⭐ Itens de Destaque (recupera até 40 pontos)
 - Nenhum item bônus foi identificado. Tente adicionar mais estilo e complexidade ao seu código nas próximas tentativas!
