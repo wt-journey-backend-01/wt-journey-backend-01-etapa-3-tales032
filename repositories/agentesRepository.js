@@ -1,15 +1,13 @@
 const db = require("../db/db")
 
 async function createAgent(data) {
-    try {
-        
-        const created = await db("agentes").insert(data).returning("*");
-        return created
-
-    } catch (error) {
-
-        console.log(error)
-        return false
+    
+      try {
+        const [createdCaso] = await db('casos').insert(data, ['*']);
+        return createdCaso;
+    } catch (err) {
+        console.error(err);
+        return false;
     }
 }
 
