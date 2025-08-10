@@ -1,1 +1,28 @@
-{"name":"wt-journey-backend-01-etapa-3-tales032","version":"1.0.0","description":"## 🧩 Contexto","main":"server.js","scripts":{"test":"echo \"Error: no test specified\" && exit 1","db:reset":"docker compose down -v && docker compose up -d && sleep 4 && npx knex migrate:latest && npx knex seed:run"},"repository":{"type":"git","url":"git+https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-tales032.git"},"keywords":[],"author":"","license":"ISC","bugs":{"url":"https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-tales032/issues"},"homepage":"https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-tales032#readme","dependencies":{"dotenv":"^16.4.7","express":"^5.1.0","knex":"^3.1.0","pg":"^8.16.3","swagger-ui-express":"^5.0.1"}}
+{
+"name": "wt-journey-backend-01-etapa-3-tales032",
+"version": "1.0.0",
+"description": "Etapa 3: API para o Departamento de Polícia",
+"main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:reset": "docker compose down -v && docker compose up -d && sleep 4 && npx knex migrate:latest && npx knex seed:run"
+  },
+"repository": {
+  "type": "git",
+  "url": "git+https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-tales032.git"
+},
+"keywords": [],
+"author": "",
+"license": "ISC",
+"bugs": {
+  "url": "https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-tales032/issues"
+},
+"homepage": "https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-tales032#readme",
+"dependencies": {
+  "dotenv": "^17.2.1",
+  "express": "^5.1.0",
+  "knex": "^3.1.0",
+  "pg": "^8.16.3",
+  "swagger-ui-express": "^5.0.1"
+}
+}
