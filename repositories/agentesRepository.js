@@ -3,8 +3,8 @@ const db = require("../db/db")
 async function createAgent(data) {
     try {
         
-          const [newAgent] = await db("agentes").insert(data).returning("*");
-        return newAgent; 
+        const created = await db("agentes").insert(data).returning("*");
+        return created
 
     } catch (error) {
 
