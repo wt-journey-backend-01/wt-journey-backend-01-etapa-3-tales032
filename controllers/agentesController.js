@@ -124,67 +124,71 @@ async function createAgentController(req, res) {
 }
 }
 
-async function updateAgentController(req,res){
-    try{
-       const { id } = req.params;
-       const data = req.body;
+async function updateAgentController(req, res) {
+try {
+  const id = Number(req.params.id); 
+  if (isNaN(id)) return res.status(400).json({ message: "O ID deve ser um número." });
 
-       const agentExists = await agentesRepository.getAgentByID(id);
-        if (!agentExists) {
-            return res.status(404).json({ message: "Agente não encontrado." });
-        }
+  const data = req.body;
+  
+  const agentExists = await agentesRepository.getAgentByID(id);
+  if (!agentExists) {
+    return res.status(404).json({ message: "Agente não encontrado." });
+  }
 
+  const validation = validatePutAgent(data);
+  if (!validation.isValid) {
+    return res.status(400).json({ message: validation.message });
+  }
 
-       const validation = validatePutAgent(data);
-        if (!validation.isValid) {
-            return res.status(400).json({ message: validation.message });
-        }
-       const updatedAgent = await agentesRepository.updateAgent(id, data); 
-       res.status(200).json(updatedAgent);
-    }catch(error){
-        console.error(error);
-        res.status(500).json({ message: "Erro interno do servidor." });
+  const updatedAgent = await agentesRepository.updateAgent(id, data); 
+  res.status(200).json(updatedAgent);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: "Erro interno do servidor." });
 }
 }
 
-async function patchAgentController(req,res){
-    try{
-       const { id } = req.params;
-       const data = req.body;
+async function patchAgentController(req, res) {
+try {
+  const id = Number(req.params.id); 
+  if (isNaN(id)) return res.status(400).json({ message: "O ID deve ser um número." });
 
-       const agentExists = await agentesRepository.getAgentByID(id);
-        if (!agentExists) {
-            return res.status(404).json({ message: "Agente não encontrado." });
-        }
+  const data = req.body;
 
+  const agentExists = await agentesRepository.getAgentByID(id);
+  if (!agentExists) {
+    return res.status(404).json({ message: "Agente não encontrado." });
+  }
 
-       const validation = validatePatchAgent(data);
-        if (!validation.isValid) {
-            return res.status(400).json({ message: validation.message });
-        }
-       const patchedAgent = await agentesRepository.patchAgent(id, data); 
-       res.status(200).json(patchedAgent);
-    }catch(error){
-        console.error(error);
-        res.status(500).json({ message: "Erro interno do servidor." });
+  const validation = validatePatchAgent(data);
+  if (!validation.isValid) {
+    return res.status(400).json({ message: validation.message });
+  }
+
+  const patchedAgent = await agentesRepository.patchAgent(id, data); 
+  res.status(200).json(patchedAgent);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: "Erro interno do servidor." });
 }
 }
 
+async function deleteAgentController(req, res) {
+try {
+  const id = Number(req.params.id); 
+  if (isNaN(id)) return res.status(400).json({ message: "O ID deve ser um número." });
 
-async function deleteAgentController(req,res){
-    try{
-         const { id } = req.params;
+  const agentExists = await agentesRepository.getAgentByID(id);
+  if (!agentExists) {
+    return res.status(404).json({ message: "Agente não encontrado." });
+  }
 
-         const agentExists = await agentesRepository.getAgentByID(id);
-        if (!agentExists) {
-            return res.status(404).json({ message: "Agente não encontrado." });
-        }
-
-        await agentesRepository.deleteAgent(id);
-         res.status(204).send();
-    }catch(error){
-        console.error(error);
-        res.status(500).json({ message: "Erro interno do servidor." });
+  await agentesRepository.deleteAgent(id);
+  res.status(204).send();
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: "Erro interno do servidor." });
 }
 }
 

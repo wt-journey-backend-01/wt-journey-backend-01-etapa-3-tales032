@@ -88,19 +88,20 @@ async function getCaseByIDController(req, res) {
 }
 
 async function createCaseController(req, res) {
-    try {
-        const data = req.body;
-        const validation = await validateCaso(data, false); 
+try {
+  const data = req.body;
+  const validation = await validateCaso(data, false); 
 
-        if (!validation.isValid) {
-            return res.status(validation.status || 400).json({ message: validation.message });
-        }
+  if (!validation.isValid) {
+    return res.status(validation.status || 400).json({ message: validation.message });
+  }
 
-        const newCase = await casosRepository.createCase(data);
-        res.status(201).json(newCase[0]);
-    } catch (error) {
-        res.status(500).json({ message: "Erro interno do servidor." });
-    }
+  const newCase = await casosRepository.createCase(data);
+  res.status(201).json(newCase); 
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: "Erro interno do servidor." });
+}
 }
 
 async function updateCaseController(req, res) {

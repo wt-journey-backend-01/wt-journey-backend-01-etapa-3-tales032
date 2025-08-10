@@ -3,7 +3,7 @@ const db = require("../db/db");
 async function createCase(data) {
 try {
   const [createdCase] = await db("casos").insert(data).returning("*");
-  return createdCase;
+  return createdCase; 
 } catch (error) {
   console.log(error);
   return false;
@@ -32,6 +32,22 @@ try {
 }
 }
 
+async function patchCase(id, data) {
+try {
+
+  const existingCase = await db("casos").where({ id }).first();
+  if (!existingCase) return null;
+
+  const updatedData = { ...existingCase, ...data };
+  const updated = await db("casos").where({ id }).update(updatedData).returning("*");
+  if (!updated || updated.length === 0) return null;
+  return updated[0];
+} catch (error) {
+  console.log(error);
+  return false;
+}
+}
+
 async function deleteCase(id) {
 try {
   const deleted = await db("casos").where({ id }).del();
@@ -42,7 +58,7 @@ try {
 }
 }
 
-async function getAll(filtros) {
+async function getAll(filtros = {}) {
 try {
   let query = db("casos").select("*");
 
@@ -59,6 +75,9 @@ try {
     });
   }
 
+  // Default ordering
+  query = query.orderBy('id', 'asc');
+
   return await query;
 } catch (error) {
   console.log(error);
@@ -71,6 +90,6 @@ getAll,
 getCaseByID,
 createCase,
 updateCase,
-deleteCase,
-patchCase: updateCase
+patchCase, 
+deleteCase
 };

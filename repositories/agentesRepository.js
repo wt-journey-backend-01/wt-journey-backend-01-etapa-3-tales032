@@ -32,6 +32,22 @@ try {
 }
 }
 
+async function patchAgent(id, data) {
+try {
+
+  const existingAgent = await db("agentes").where({ id }).first();
+  if (!existingAgent) return null;
+
+  const updatedData = { ...existingAgent, ...data };
+  const updated = await db("agentes").where({ id }).update(updatedData).returning("*");
+  if (!updated || updated.length === 0) return null;
+  return updated[0];
+} catch (error) {
+  console.log(error);
+  return false;
+}
+}
+
 async function deleteAgent(id) {
 try {
   const deleted = await db("agentes").where({ id }).del();
@@ -45,7 +61,7 @@ try {
 async function getAll(sortBy = 'id', order = 'asc') {
 try {
   let query = db("agentes").select("*");
-  const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo'];
+  const validSortFields = ['dataDeIncorporacao', 'nome', 'cargo', 'id'];
   const validOrders = ['asc', 'desc'];
 
   if (sortBy && validSortFields.includes(sortBy)) {
@@ -53,6 +69,9 @@ try {
     if (validOrders.includes(orderLower)) {
       query = query.orderBy(sortBy, orderLower);
     }
+  } else {
+
+    query = query.orderBy('id', 'asc');
   }
 
   return await query;
@@ -67,6 +86,6 @@ getAll,
 getAgentByID,
 createAgent,
 updateAgent,
-deleteAgent,
-patchAgent: updateAgent
+patchAgent, 
+deleteAgent
 };
